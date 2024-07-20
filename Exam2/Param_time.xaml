@@ -1,0 +1,19 @@
+﻿<Window x:Class="Exam2.Param_time"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Exam2"
+        mc:Ignorable="d"
+        Title="Param_time" Height="450" Width="800">
+    <Grid>
+        <Grid>
+            <TextBox x:Name="txt_hour" HorizontalAlignment="Left" Height="22" Margin="324,86,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="137"/>
+            <TextBox x:Name="txt_min" HorizontalAlignment="Left" Height="22" Margin="324,160,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="134"/>
+            <TextBlock x:Name="block_hour" HorizontalAlignment="Left" Margin="326,60,0,0" TextWrapping="Wrap" Text="Введите часы:" VerticalAlignment="Top" RenderTransformOrigin="0.956,-2.402" Width="135"/>
+            <TextBlock x:Name="block_min" HorizontalAlignment="Left" Margin="326,139,0,0" TextWrapping="Wrap" Text="Введите минуты:" VerticalAlignment="Top" Width="128"/>
+            <Button x:Name="btn_ok" Content="Готово" HorizontalAlignment="Left" Margin="351,243,0,0" VerticalAlignment="Top" Width="75" Click="btn_ok_Click"/>
+        </Grid>
+
+    </Grid>
+</Window>
