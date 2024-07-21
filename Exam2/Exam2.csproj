@@ -63,11 +63,19 @@
     <Compile Include="Add_client.xaml.cs">
       <DependentUpon>Add_client.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Buy_ticket.cs" />
     <Compile Include="Client.cs" />
+    <Compile Include="Form_buy.xaml.cs">
+      <DependentUpon>Form_buy.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View_pic.xaml.cs">
       <DependentUpon>View_pic.xaml</DependentUpon>
     </Compile>
     <Page Include="Add_client.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Form_buy.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

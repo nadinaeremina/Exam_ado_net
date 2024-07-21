@@ -31,13 +31,17 @@ namespace Exam2
     /// </summary>
     public partial class MainWindow : Window
     {
+        // глобальные переменные
         DateTime myDate;
+        bool flagg = false;
+        int My_num_event;
         string fileName = "";
         int number_cat = -1;
         string myString = "";
         bool flag = false;
         string cs = "";
-        SqlConnection conn = null; 
+        SqlConnection conn = null;
+        SqlCommand cmd = new SqlCommand();
         DataSet ds_s = new DataSet();
         DataTable dt_events = new DataTable();
         SqlDataAdapter events_adapter = new SqlDataAdapter();
@@ -48,17 +52,19 @@ namespace Exam2
         Param_time form_param_4 = new Param_time();
         View_pic new_wind = new View_pic();
         Add_client new_client = new Add_client();
+        Form_buy buy_tick = new Form_buy();
 
         public MainWindow()
         {
             InitializeComponent();
 
-            conn = new SqlConnection(); 
-            cs = ConfigurationManager.ConnectionStrings["Events"].ConnectionString; 
+            conn = new SqlConnection();
+            cs = ConfigurationManager.ConnectionStrings["Events"].ConnectionString;
             conn.ConnectionString = cs;
 
             string connectionstring = ConfigurationManager.ConnectionStrings["Events"].ConnectionString;
 
+            // работаем в присоединенном режиме - считываем таблицы
             using (SqlConnection conn = new SqlConnection(connectionstring))
             {
                 conn.Open();
@@ -84,14 +90,18 @@ namespace Exam2
                 fill_data_set("dbo.show_archive_events", "table_dbo.move_to_archive");
             }
         }
+
+        // создаем команду, передавая в нее хранимку, создаем адаптер, коммандбилдер, из адаптеру в датасет передаем информацию в соданнную таблицу
         private void fill_data_set(string prosedure_name, string table_name, string str_param = "", object param = null)
         {
-            SqlCommand cmd = new SqlCommand(prosedure_name, conn);
+            cmd = new SqlCommand(prosedure_name, conn);
             events_adapter = new SqlDataAdapter();
             fill_adapter(cmd, str_param, param);
             cmd_events = new SqlCommandBuilder(events_adapter);
             events_adapter.Fill(ds_s, table_name);
         }
+
+        // заполняем адаптер характеристиками и передаем параметр, если таковой есть
         private void fill_adapter(SqlCommand command, string str_param = "", object param = null)
         {
             events_adapter.InsertCommand = command;
@@ -102,22 +112,22 @@ namespace Exam2
                 command.Parameters.AddWithValue(str_param, param);
         }
 
+        // заполняем дата грид информацией из определенной таблицы
         private void fill_data_grid(string table_name)
         {
             dt_events = ds_s.Tables[table_name];
             Data_grid.DataContext = null;
             Data_grid.DataContext = ds_s.Tables[table_name];
-            
+
             if (Data_grid.Items.Count == 1)
                 System.Windows.MessageBox.Show("Таблица пустая или были введены некорректные данные!");
         }
 
+        // заполняем датагрид в соответствии с выбранным айтемом из комбобокса
         private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            add_client.Visibility = Visibility.Hidden;
-            btn_pic_event.Visibility = Visibility.Hidden;
-            btn_show.Visibility = Visibility.Hidden;
-           
+            hiding_buttons();
+
             if (combo_box.SelectedItem == actual_events_100percent)
                 fill_data_grid("table_actual_events_full_sold");
             else if (combo_box.SelectedItem == actual_events_top3)
@@ -134,6 +144,7 @@ namespace Exam2
                 fill_data_grid("table_today_cities");
             else
             {
+                // при выборе других айтемов необходимо создание дополнительной формы для ввода параметров 
                 btn_show.Visibility = Visibility.Visible;
 
                 if (combo_box.SelectedIndex == 0)
@@ -164,7 +175,8 @@ namespace Exam2
                 flag = !flag;
             }
         }
-      
+
+        // кнопка для заполнения датагрида после ввода параметров
         private void btn_show_Click(object sender, RoutedEventArgs e)
         {
             Data_grid.DataContext = null;
@@ -194,6 +206,8 @@ namespace Exam2
                 fill_data_grid("table_events_specific_time");
             }
         }
+
+        //////////////////////////////////// правая панель для вывода всех таблиц нашей БД
         private void btn_countries_Click(object sender, RoutedEventArgs e)
         {
             hiding_buttons();
@@ -237,8 +251,6 @@ namespace Exam2
             hiding_buttons();
             fill_data_grid("table_show_clients");
             add_client.Visibility = Visibility.Visible;
-            add_client.Content = "Добавить клиента";
-            btn_update.Visibility = Visibility.Visible;
         }
 
         private void btn_archive_Click(object sender, RoutedEventArgs e)
@@ -251,16 +263,17 @@ namespace Exam2
         {
             hiding_buttons();
             fill_data_grid("table_show_buy_tickets");
-            add_client.Content = "Купить билет";
+            buy_ticket.Visibility = Visibility.Visible;
         }
 
         private void btn_picturess_Click(object sender, RoutedEventArgs e)
         {
             hiding_buttons();
             combo_choice_category.Visibility = Visibility.Visible;
-            text_choice_category.Visibility = Visibility.Visible;  
+            text_choice_category.Visibility = Visibility.Visible;
         }
 
+        // сокрытие ненужных кнопок
         private void hiding_buttons()
         {
             btn_1_pic.Visibility = Visibility.Hidden;
@@ -271,9 +284,12 @@ namespace Exam2
             btn_show.Visibility = Visibility.Hidden;
             my_image.Source = null;
             add_event.Visibility = Visibility.Hidden;
-            btn_update.Visibility = Visibility.Hidden;
+            btn_update_client.Visibility = Visibility.Hidden;
+            buy_ticket.Visibility = Visibility.Hidden;
+            btn_update_tickets.Visibility = Visibility.Hidden;
         }
 
+        // работа с опенфайл - выбор картинки для события
         private void choice_category_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             hiding_buttons();
@@ -291,10 +307,11 @@ namespace Exam2
             btn_1_pic.Visibility = Visibility.Visible;
         }
 
+        // загрузка картинки в событие - заполнение таблицы - 'Pictures'
         private void LoadPicture()
         {
             try
-            {              
+            {
                 byte[] bytes = CreateCopy();
 
                 conn.Open();
@@ -316,7 +333,6 @@ namespace Exam2
                 cmd.Parameters.Add("@event_category_id", SqlDbType.Int, 255).Value = index;
 
                 cmd.ExecuteNonQuery();
-
 
                 cmd = new SqlCommand("update_pictures", conn);
                 cmd.CommandType = CommandType.StoredProcedure;
@@ -412,11 +428,9 @@ namespace Exam2
             }
         }
 
-        bool flagg = false;
-        int My_num_event;
-
+        // отображение картинки выбранного пользователем события
         private void btn_pic_event_Click_1(object sender, RoutedEventArgs e)
-       {
+        {
             if (!flagg)
             {
                 View_pic new_wind = new View_pic();
@@ -468,13 +482,33 @@ namespace Exam2
             }
         }
 
+        // добавить клиента
         private void add_client_Click(object sender, RoutedEventArgs e)
         {
-            btn_update.Visibility = Visibility.Visible;
+            btn_update_client.Visibility = Visibility.Visible;
             Add_client new_client = new Add_client();
             new_client.ShowDialog();
         }
 
+        // добавить событие
+        private void add_event_Click(object sender, RoutedEventArgs e)
+        {
+            using (SqlConnection conn = new SqlConnection(cs))
+            {
+                conn.Open();
+                events_adapter.Update(ds_s, "table_show_events_contents");
+            }
+        }
+
+        // покупка билета
+        private void buy_ticket_Click(object sender, RoutedEventArgs e)
+        {
+            btn_update_tickets.Visibility = Visibility.Visible;
+            Form_buy new_tick = new Form_buy();
+            new_tick.ShowDialog();
+        }
+
+        // подключиться к БД и обновить данные по клиентам
         private void btn_update_Click(object sender, RoutedEventArgs e)
         {
             // чтобы работать с таблицами в БД как с источником Ling - нам нужно создать класс 'DataContext'
@@ -503,12 +537,85 @@ namespace Exam2
             }
         }
 
-        private void add_event_Click(object sender, RoutedEventArgs e)
+        // подключиться к БД и проверить информацию по билетам
+        private void btn_update_tickets_Click(object sender, RoutedEventArgs e)
         {
-            using (SqlConnection conn = new SqlConnection(cs))
+            using (DataContext db = new DataContext(conn))
             {
-                conn.Open();
-                events_adapter.Update(ds_s, "table_show_events_contents");
+                Table<Buy_ticket> new_buy_ticket = db.GetTable<Buy_ticket>();
+
+                Buy_ticket new_buy = new Buy_ticket()
+                {
+                    Value = Form_buy.Buy_ticket.Value,
+                    date_of_bought = Form_buy.Buy_ticket.date_of_bought,
+                    client_Id = Form_buy.Buy_ticket.client_id,
+                    event_name_ID = Form_buy.Buy_ticket.event_name_id
+                };
+
+                int max_tick = 0, buy_tick_int = 0, min_age = 0, client_age = 0, month = -1;
+                DateTime birth, today = DateTime.Now;
+
+                conn.Open(); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+                // находим событие и получаем информацию о нем (купленные билеты+всего билетов)
+                cmd = new SqlCommand("dbo.search_event", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@id", new_buy.event_name_ID); // нужно быть уверенным, что второй пар-р нужного типа
+
+                SqlDataReader dr = cmd.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    max_tick = (int)dr[0];
+                    buy_tick_int = (int)dr[1];
+                    min_age = (int)dr[2];
+                }
+
+                dr.Close();
+
+                // находим клиента и получаем информацию о нем (возраст)
+                cmd = new SqlCommand("dbo.search_client", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@id", new_buy.client_Id); // нужно быть уверенным, что второй пар-р нужного типа
+
+                dr = cmd.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    birth = (DateTime)dr[0];
+                    month = today.Month - birth.Month;
+                    client_age = today.Year - birth.Year;
+
+                    if (month < 0)
+                        client_age--;
+                    if (month == 0)
+                    {
+                        if (today.Day < birth.Day)
+                            client_age--;
+                    }
+                }
+
+                dr.Close();
+
+                if (max_tick > buy_tick_int && client_age >= min_age)
+                {
+                    new_buy_ticket.InsertOnSubmit(new_buy);
+                    db.SubmitChanges();
+
+                    fill_data_set("dbo.show_buy_tickets", "table_show_buy_tickets");
+                    fill_data_grid("table_show_buy_tickets");
+
+                    System.Windows.MessageBox.Show("Покупка совершена!");
+                }
+                else
+                {
+                    if (max_tick <= buy_tick_int)
+                        System.Windows.MessageBox.Show("К сожалению, билетов не осталось!");
+                    else
+                        System.Windows.MessageBox.Show("К сожалению, возраст не подходит!");
+                }
+
+                conn.Close(); // почему-то при работе с этим событием  возникала ошибка - подключение не было закрыто в месте, которое помечено '!!!'
             }
         }
     }

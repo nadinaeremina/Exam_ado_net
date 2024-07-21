@@ -72,8 +72,10 @@
         <Image  x:Name="my_image" HorizontalAlignment="Left" Height="123" Margin="1029,287,0,0" Grid.Row="2" VerticalAlignment="Top" Width="201" />
         <Button x:Name="btn_pic_event" Visibility="Hidden" Content="Показать картинку события" HorizontalAlignment="Left" Margin="1038,104,0,0" Grid.Row="2" VerticalAlignment="Top" Width="175" Height="36" Click="btn_pic_event_Click_1"/>
         <Button x:Name="add_client" Visibility="Hidden" Content="Добавить клиента" HorizontalAlignment="Left" Margin="1062,110,0,0" Grid.Row="2" VerticalAlignment="Top" Width="119" Click="add_client_Click"/>
-        <Button x:Name="btn_update" Visibility="Hidden" Content="Обновить БД" HorizontalAlignment="Left" Margin="1055,153,0,0" Grid.Row="2" VerticalAlignment="Top" Width="124" Click="btn_update_Click" />
+        <Button x:Name="btn_update_client" Visibility="Hidden" Content="Обновить БД" HorizontalAlignment="Left" Margin="1055,153,0,0" Grid.Row="2" VerticalAlignment="Top" Width="124" Click="btn_update_Click" />
         <Button x:Name="add_event" Visibility="Hidden" Content="Добавить событие" HorizontalAlignment="Left" Margin="1055,153,0,0" Grid.Row="2" VerticalAlignment="Top" Width="124" Click="add_event_Click" />
+        <Button x:Name="buy_ticket" Visibility="Hidden" Content="Купить билет" HorizontalAlignment="Left" Margin="1055,153,0,0" Grid.Row="2" VerticalAlignment="Top" Width="124" Click="buy_ticket_Click"/>
+        <Button x:Name="btn_update_tickets" Visibility="Hidden" Content="Проверить наличие" HorizontalAlignment="Left" Margin="1055,153,0,0" Grid.Row="2" VerticalAlignment="Top" Width="124" Click="btn_update_tickets_Click"/>
     </Grid>
 </Window>
 
